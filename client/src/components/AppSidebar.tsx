@@ -37,9 +37,11 @@ interface AppSidebarProps {
 const menuItems = {
   admin: [
     { title: "Dashboard", icon: LayoutDashboard, url: "/" },
+    { title: "Academic Sessions", icon: Calendar, url: "/academic-sessions" },
+    { title: "Classes", icon: BookOpen, url: "/classes" },
+    { title: "Users", icon: Users, url: "/users" },
     { title: "Students", icon: GraduationCap, url: "/students" },
     { title: "Teachers", icon: Users, url: "/teachers" },
-    { title: "Classes", icon: BookOpen, url: "/classes" },
     { title: "Attendance", icon: Calendar, url: "/attendance" },
     { title: "Exams", icon: FileText, url: "/exams" },
     { title: "Finance", icon: CreditCard, url: "/finance" },

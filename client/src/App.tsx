@@ -7,6 +7,10 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
+import InstitutionSettings from "@/pages/InstitutionSettings";
+import AcademicSessions from "@/pages/AcademicSessions";
+import ClassManagement from "@/pages/ClassManagement";
+import Users from "@/pages/Users";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -18,6 +22,10 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/settings" component={InstitutionSettings} />
+          <Route path="/academic-sessions" component={AcademicSessions} />
+          <Route path="/classes" component={ClassManagement} />
+          <Route path="/users" component={Users} />
         </>
       )}
       <Route component={NotFound} />
