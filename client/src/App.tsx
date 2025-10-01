@@ -11,6 +11,8 @@ import InstitutionSettings from "@/pages/InstitutionSettings";
 import AcademicSessions from "@/pages/AcademicSessions";
 import ClassManagement from "@/pages/ClassManagement";
 import Users from "@/pages/Users";
+import Subjects from "@/pages/Subjects";
+import Sections from "@/pages/Sections";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -25,6 +27,8 @@ function Router() {
           <Route path="/settings" component={InstitutionSettings} />
           <Route path="/academic-sessions" component={AcademicSessions} />
           <Route path="/classes" component={ClassManagement} />
+          <Route path="/subjects" component={Subjects} />
+          <Route path="/sections" component={Sections} />
           <Route path="/users" component={Users} />
         </>
       )}

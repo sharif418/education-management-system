@@ -39,6 +39,8 @@ const menuItems = {
     { title: "Dashboard", icon: LayoutDashboard, url: "/" },
     { title: "Academic Sessions", icon: Calendar, url: "/academic-sessions" },
     { title: "Classes", icon: BookOpen, url: "/classes" },
+    { title: "Subjects", icon: BookOpen, url: "/subjects" },
+    { title: "Sections", icon: Users, url: "/sections" },
     { title: "Users", icon: Users, url: "/users" },
     { title: "Students", icon: GraduationCap, url: "/students" },
     { title: "Teachers", icon: Users, url: "/teachers" },
