@@ -13,6 +13,7 @@ import ClassManagement from "@/pages/ClassManagement";
 import Users from "@/pages/Users";
 import Subjects from "@/pages/Subjects";
 import Sections from "@/pages/Sections";
+import Enrollments from "@/pages/Enrollments";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -29,6 +30,7 @@ function Router() {
           <Route path="/classes" component={ClassManagement} />
           <Route path="/subjects" component={Subjects} />
           <Route path="/sections" component={Sections} />
+          <Route path="/enrollments" component={Enrollments} />
           <Route path="/users" component={Users} />
         </>
       )}

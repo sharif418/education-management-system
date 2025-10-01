@@ -41,6 +41,7 @@ const menuItems = {
     { title: "Classes", icon: BookOpen, url: "/classes" },
     { title: "Subjects", icon: BookOpen, url: "/subjects" },
     { title: "Sections", icon: Users, url: "/sections" },
+    { title: "Enrollments", icon: GraduationCap, url: "/enrollments" },
     { title: "Users", icon: Users, url: "/users" },
     { title: "Students", icon: GraduationCap, url: "/students" },
     { title: "Teachers", icon: Users, url: "/teachers" },
