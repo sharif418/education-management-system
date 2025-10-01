@@ -7,17 +7,27 @@ import NotificationPanel from "@/components/NotificationPanel";
 import QuickActions from "@/components/QuickActions";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Users, GraduationCap, DollarSign, Calendar, FileText, CreditCard } from "lucide-react";
+import type { Notification } from "@shared/schema";
 
 export default function Home() {
-  //TODO: remove mock functionality - replace with actual user data
-  const mockUser = {
-    name: "Admin User",
-    email: "admin@edupro.com",
-    avatar: undefined,
+  const { user } = useAuth();
+  
+  const { data: notificationsData = [] } = useQuery<Notification[]>({
+    queryKey: ['/api/notifications'],
+    enabled: !!user,
+  });
+
+  const userData = {
+    name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User' : 'User',
+    email: user?.email || '',
+    avatar: user?.profileImageUrl || undefined,
   };
 
-  //TODO: remove mock functionality - replace with actual stats
+  const userRole = (user?.role || 'student') as "admin" | "teacher" | "student" | "guardian";
+
   const stats = [
     { title: "Total Students", value: "1,234", icon: Users, trend: { value: "12% from last month", isPositive: true } },
     { title: "Total Teachers", value: "87", icon: GraduationCap, trend: { value: "3 new this month", isPositive: true } },
@@ -25,34 +35,21 @@ export default function Home() {
     { title: "Attendance", value: "92%", icon: Calendar, trend: { value: "2% from last week", isPositive: true } },
   ];
 
-  //TODO: remove mock functionality
   const schedule = [
     { period: 1, subject: "Mathematics", time: "8:00 - 8:45", teacher: "Mr. Rahman", room: "101" },
     { period: 2, subject: "English", time: "8:50 - 9:35", teacher: "Ms. Sultana", room: "102", isActive: true },
     { period: 3, subject: "Physics", time: "9:40 - 10:25", teacher: "Mr. Khan", room: "Lab-1" },
   ];
 
-  //TODO: remove mock functionality
-  const notifications = [
-    {
-      id: "1",
-      type: "info" as const,
-      title: "New Assignment Posted",
-      message: "Mathematics assignment due on Friday",
-      time: "2 hours ago",
-      isRead: false,
-    },
-    {
-      id: "2",
-      type: "warning" as const,
-      title: "Fee Payment Due",
-      message: "Monthly fee payment due in 3 days",
-      time: "1 day ago",
-      isRead: false,
-    },
-  ];
+  const notifications = notificationsData.map(n => ({
+    id: n.id,
+    type: n.type as "info" | "warning" | "success",
+    title: n.title,
+    message: n.message,
+    time: new Date(n.createdAt!).toLocaleString(),
+    isRead: n.isRead || false,
+  }));
 
-  //TODO: remove mock functionality
   const attendanceDays = [
     ...Array(5).fill({ date: null, status: null }),
     ...Array(20).fill(null).map((_, i) => ({ 
@@ -61,7 +58,6 @@ export default function Home() {
     })),
   ];
 
-  //TODO: remove mock functionality
   const quickActions = [
     { label: "Take Attendance", icon: Users, onClick: () => console.log("Take Attendance") },
     { label: "View Schedule", icon: Calendar, onClick: () => console.log("View Schedule") },
@@ -77,7 +73,7 @@ export default function Home() {
   return (
     <SidebarProvider style={style as React.CSSProperties}>
       <div className="flex h-screen w-full">
-        <AppSidebar role="admin" user={mockUser} />
+        <AppSidebar role={userRole} user={userData} />
         <div className="flex flex-col flex-1 overflow-hidden">
           <header className="flex items-center justify-between p-4 border-b">
             <div className="flex items-center gap-2">
@@ -91,16 +87,13 @@ export default function Home() {
           </header>
           
           <main className="flex-1 overflow-auto p-6">
-            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
               {stats.map((stat, idx) => (
                 <StatCard key={idx} {...stat} />
               ))}
             </div>
 
-            {/* Main Content Grid */}
             <div className="grid lg:grid-cols-3 gap-6">
-              {/* Left Column */}
               <div className="lg:col-span-2 space-y-6">
                 <AttendanceCalendar 
                   month="January" 
@@ -110,7 +103,6 @@ export default function Home() {
                 <ScheduleCard title="Today's Schedule" schedule={schedule} />
               </div>
 
-              {/* Right Column */}
               <div className="space-y-6">
                 <QuickActions actions={quickActions} />
                 <NotificationPanel notifications={notifications} />

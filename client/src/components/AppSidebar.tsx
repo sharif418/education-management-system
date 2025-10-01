@@ -126,14 +126,14 @@ export default function AppSidebar({ role, user }: AppSidebarProps) {
             </Badge>
           </div>
         </div>
-        <button
-          onClick={() => console.log("Logout clicked")}
-          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover-elevate rounded-md"
+        <a
+          href="/api/logout"
+          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent rounded-md transition-colors"
           data-testid="button-logout"
         >
           <LogOut className="w-4 h-4" />
           Logout
-        </button>
+        </a>
       </SidebarFooter>
     </Sidebar>
   );
