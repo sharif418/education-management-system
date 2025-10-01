@@ -1,0 +1,483 @@
+EduPro Next‑Gen পরিকল্পনা (Proposed Master Plan)
+
+1. ভিশন ও মূল কাঠামো
+
+
+
+
+
+ব্যবহার ক্ষেত্র: বর্তমানে একটি প্রতিষ্ঠানের জন্য (single-tenant), তবে আর্কিটেকচার টেমপ্লেট আকারে থাকবে যাতে নতুন VPS এ কপি-ডিপ্লয় করে সহজে কাস্টমাইজ করা যায়।
+
+
+
+ব্যবহারকারীর ভূমিকা (RBAC): SuperAdmin (ফুল কন্ট্রোল), Admin (SuperAdmin এর ডেলিগেট), Teacher, Student, Guardian, Accountant, Hostel Manager. ভবিষ্যতে নতুন রোল যুক্ত করার সুবিধা থাকবে।
+
+
+
+ভাষা: বাংলা, ইংরেজি, আরবি একইসাথে (i18n, RTL সাপোর্ট)।
+
+
+
+স্কেলেবিলিটি: যেকোনো সাইজের প্রতিষ্ঠান সাপোর্ট — ডেটা মডেল ও মডিউল ডিজাইন স্কেলেবল থাকবে (ব্যাচ, শিফট, একাধিক ক্যাম্পাস হ্যান্ডেল করবে)।
+
+
+
+কাস্টমাইজেশন: প্রতিটি প্রতিষ্ঠানের জন্য ফিচার অন/অফ, থিম, ব্র্যান্ডিং, কনটেন্ট সম্পাদনা — কনফিগারেশন-ড্রিভেন।
+
+2. প্রায়োরিটি ম্যাট্রিক্স
+
+
+
+
+
+
+
+বিভাগ
+
+
+
+ফিচার
+
+
+
+প্রায়োরিটি
+
+
+
+
+
+Academic
+
+
+
+ক্লাস/সেকশন, সাবজেক্ট, সিলেবাস, টাইমটেবল, উপস্থিতি (শিক্ষার্থী+শিক্ষক), অ্যাসাইনমেন্ট, পরীক্ষা, গ্রেডিং, রিপোর্ট কার্ড
+
+
+
+High
+
+
+
+
+
+Financial
+
+
+
+ফি কালেকশন, ইনভয়েস, পেমেন্ট ট্র্যাকিং, স্যালারি, এক্সপেন্স, ফিন্যান্স রিপোর্ট
+
+
+
+High
+
+
+
+
+
+Communication
+
+
+
+নোটিফিকেশন
+
+
+
+Medium
+
+
+
+
+
+
+
+
+
+SMS/Email ইন্টিগ্রেশন
+
+
+
+Low
+
+
+
+
+
+
+
+
+
+ইন-অ্যাপ মেসেজিং, অ্যানাউন্সমেন্ট, প্যারেন্ট-টিচার কমিউনিকেশন
+
+
+
+High
+
+
+
+
+
+Advanced
+
+
+
+AI রিকমেন্ডেশন, OMR স্ক্যানিং, অনলাইন পরীক্ষা, ভিডিও কনফারেন্সিং, গ্যামিফিকেশন, PWA
+
+
+
+High (Phase অনুযায়ী বিতরণ করা হবে)
+
+
+
+
+
+Islamic
+
+
+
+কুরআন মুখস্থ ট্র্যাকিং, নামাজ সময়সূচী, ইসলামিক ক্যালেন্ডার, ইসলামিক স্টাডিজ গ্রেডিং
+
+
+
+High (মডিউল আকারে, ঐচ্ছিক)
+
+
+
+
+
+Website
+
+
+
+প্রেজেন্টেশন সাইট (content editable by Admin)
+
+
+
+High
+
+3. প্রস্তাবিত টেক স্ট্যাক
+
+
+
+
+
+Frontend: Next.js (App Router) + TypeScript, Tailwind CSS, Zustand/Redux Toolkit (state), Radix UI/Headless UI, TanStack Query, Chart.js/Recharts.
+
+
+
+Backend API: NestJS অথবা Next.js API Routes (প্রয়োজনে আলাদা NestJS service)। REST + GraphQL (অপশনাল) স্ট্রাকচার, Socket.IO দ্বারা রিয়েল-টাইম ইভেন্ট।
+
+
+
+Database: PostgreSQL (প্রাইমারি), Prisma ORM. Full-text search + JSON field support.
+
+
+
+Caching/Queue: Redis (session, cache, job queue)।
+
+
+
+File Storage: S3-compatible (MinIO for self-host) + presigned uploads।
+
+
+
+Authentication: NextAuth/Custom JWT with 2FA (optional), Role & Permission layer (Casbin অথবা custom RBAC).
+
+
+
+Infra: Docker Compose (dev) + Docker Swarm/Kubernetes-ready manifests (future)। Traefik/Nginx reverse proxy।
+
+
+
+Monitoring: Prometheus + Grafana (Future), Loki/ELK for logs (phase later)।
+
+
+
+DevOps: GitHub Actions (CI), unit/integration tests (Vitest/Jest, Playwright)।
+
+
+
+AI ফিচার: Python microservice (FastAPI) বা Node service, huggingface API বা local models (later phases)।
+
+4. আর্কিটেকচার অ্যান্ড মডিউল স্ট্রাকচার
+
+
+
+
+
+Core Services:
+
+
+
+
+
+Identity & Access Service – ইউজার, রোল, পারমিশন, লগইন হিস্ট্রি।
+
+
+
+Organization Service – প্রতিষ্ঠান তথ্য, ক্যাম্পাস, বছর/সেশন।
+
+
+
+Academic Service – ক্লাস, সেকশন, সাবজেক্ট, সিলেবাস, রুটিন, উপস্থিতি।
+
+
+
+Learning Service – অ্যাসাইনমেন্ট, অনলাইন পরীক্ষা, গ্যামিফিকেশন, কনটেন্ট লাইব্রেরি।
+
+
+
+Assessment Service – পরীক্ষা, গ্রেডিং, রিপোর্ট কার্ড, OMR প্রসেসিং।
+
+
+
+Finance Service – ফি, ইনভয়েস, পেমেন্ট গেটওয়ে কনফিগ, স্যালারি, এক্সপেন্স, রিপোর্ট।
+
+
+
+Communication Service – নোটিফিকেশন, ইন-অ্যাপ মেসেজিং, ঘোষণা, অভিভাবক-শিক্ষক আলাপ।
+
+
+
+Islamic Module – নামাজ সময়সূচী, কুরআন মুখস্থ ট্র্যাকার, ক্যালেন্ডার।
+
+
+
+Hostel Management – রুম বরাদ্দ, উপস্থিতি, মেইন্টেন্যান্স, ফির তত্ত্বাবধান।
+
+
+
+Library (Optional Module) – ভবিষ্যতে চালু।
+
+
+
+Analytics & Recommendation – AI-driven ইনসাইট ও রেকমেন্ডেশন।
+
+
+
+Marketing Website – Next.js CMS sections (Admin content editor)।
+
+5. ডেটা মডেল হাইলাইটস
+
+
+
+
+
+Tenant-aware Entities: Institution, Campus, AcademicSession, ClassGroup, Section, Subject, User, Role, Permission, Enrollment, Attendance, Assessment, FeeSchedule, Payment, Expense, Salary, Notification, MessageThread, Homework, Exam, Grade, ReportCard, Hostel, Room, Bed, Assignment, Certificate, IslamicProgress, PrayerSchedule.
+
+
+
+Configuration Model: Feature flags, customizable grading schemes, timetable rules, fee templates, exam templates.
+
+
+
+Audit Trails: প্রতিটি ক্রিয়ার জন্য লগ (who, what, when) — নিয়ন্ত্রনের জন্য গুরুত্বপূর্ণ।
+
+6. UI/UX কৌশল
+
+
+
+
+
+Design Principles: Modern, minimal, psychologically comfortable (color, contrast, whitespace), RTL-ready।
+
+
+
+Dashboard Strategy: Role-based landing dashboards with quick actions, KPI widgets, smart notifications।
+
+
+
+Navigation: Global search, command palette, breadcrumb, consistent left/nav bar, contextual actions।
+
+
+
+Customization: Theme switcher (light/dark/institution colors), configurable widgets।
+
+
+
+Accessibility: WCAG AA compliance, keyboard friendly, localized date/number formats।
+
+
+
+Website: Story-driven sections (hero, curriculum, admissions, faculty, testimonials, contact), dynamic CMS blocks।
+
+7. ফিচার ফেজিং (৬+ মাস)
+
+
+
+
+
+Phase 0 – Foundation (4-6 সপ্তাহ)
+
+
+
+
+
+Requirements finalization, design system, architecture blueprint, DevOps pipeline, environment setup, auth & RBAC skeleton, i18n skeleton।
+
+
+
+Phase 1 – Core Academic & Identity (8-10 সপ্তাহ)
+
+
+
+
+
+Entity modeling (Institution, Users, Roles, Classes, Sections, Subjects)
+
+
+
+Attendance (teacher/student), timetable, syllabus tracking, notifications (basic)।
+
+
+
+Admin dashboards, role management UI, marketing site MVP।
+
+
+
+Phase 2 – Assessment & Learning (6-8 সপ্তাহ)
+
+
+
+
+
+Assignment, homework, exam scheduling, grading schema builder, report card generation।
+
+
+
+Online exam MVP, question bank, automated report generation।
+
+
+
+Phase 3 – Finance & Hostel (8-10 সপ্তাহ)
+
+
+
+
+
+Fee management, invoice templates, payment tracking placeholders, salary + expense module।
+
+
+
+Accountant dashboard, hostel management workflows।
+
+
+
+Phase 4 – Communication & Advanced Features (8-10 সপ্তাহ)
+
+
+
+
+
+In-app messaging, announcements, parent-teacher portal, notification center upgrades।
+
+
+
+AI recommendation groundwork (analytics pipeline), gamification system, PWA support।
+
+
+
+Islamic module (prayer schedule integration, memorization tracking) ও marketing site CMS enhancements।
+
+
+
+Phase 5 – Polishing & Optional Integrations (পরবর্তী মাসগুলো)
+
+
+
+
+
+SMS/Email integration (optional), OMR scanning, video conferencing (Zoom/MS Teams API), extended analytics dashboards।
+
+
+
+Monitoring/backup automation, packaging for resale (configuration export/import, documentation) ।
+
+
+
+প্রতিটি ফেজ শেষে demo + feedback লুপ, QA, localization, performance tuning।
+
+8. কাস্টমাইজেশন, এক্সটেনশন ও রিপ্যাকেজিং
+
+
+
+
+
+Configurable Tenants: .env + Institution config file => rebrand নাম, লোগো, থিম, ভর্তি তথ্য, Islamic module on/off.
+
+
+
+Modular Plugin System: modules/ ডিরেক্টরিতে ফিচার বসানো, feature flag দ্বারা toggle।
+
+
+
+Re-deploy Workflow: Duplicate repository -> Update config -> Deploy via Ansible/Shell script -> Seed data.
+
+9. ডিপ্লয়মেন্ট ও সার্ভার সেটআপ
+
+
+
+
+
+Stack: Docker Compose (app, db, redis, nginx)। ভবিষ্যতে Swarm/K8s readiness।
+
+
+
+Server Requirements (per institution): VPS (4 CPU, 8GB RAM recommended initial), SSD storage (100GB+), PostgreSQL (managed/hosted), Redis.
+
+
+
+Security: HTTPS (Let’s Encrypt), fail2ban, UFW, periodic patching। dotenv secrets manager (doppler/1Password)।
+
+
+
+Backup: Daily SQL dump + file backup (cron) -> remote storage (S3 compatible)।
+
+
+
+Monitoring (Later): Uptime Kuma/Netdata initially, Grafana stack in Phase 5.
+
+10. ডেলিভারেবলস
+
+
+
+
+
+Detailed architecture diagrams, ERD, API contract docs.
+
+
+
+Design system + Figma UI kit (responsive + RTL)।
+
+
+
+Sprint backlog + milestone plan per phase.
+
+
+
+Deployment playbook + tenant customization guide।
+
+
+
+Future roadmap (multi-tenant conversion, integrations, analytics expansion)।
+
+11. পরবর্তী ধাপ
+
+
+
+
+
+High-level system scope অনুমোদন।
+
+
+
+ফেজভিত্তিক কাজের বিস্তারিত টাস্ক ব্রেকডাউন (Epic → Feature → User Story → Task)।
+
+
+
+UI/UX প্রোটোটাইপিং শুরু (Design tokens, core screens)।
+
+
+
+Dev environment setup + starter repo scaffolding।
+
+প্রস্তাবিত এই প্ল্যান আপনার লক্ষ্য (একটি মাস্টারপিস, আধুনিক, উচ্চ মাত্রার কাস্টমাইজেশন) অর্জনের জন্য ভিত্তি স্থাপন করবে। চাইলে পরবর্তী ধাপে বিস্তারিত টাস্ক লিস্ট বা টেকনিক্যাল ডায়াগ্রামগুলো আলাদা করে elaboration দিতে পারি।
