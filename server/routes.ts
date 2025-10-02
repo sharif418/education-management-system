@@ -11,6 +11,12 @@ import {
   insertEnrollmentSchema,
   insertAttendanceSchema,
   insertNotificationSchema,
+  insertFeeCategorySchema,
+  insertFeeStructureSchema,
+  insertStudentFeeSchema,
+  insertPaymentSchema,
+  insertExpenseCategorySchema,
+  insertExpenseSchema,
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -537,6 +543,409 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting notification:", error);
       res.status(500).json({ message: "Failed to delete notification" });
+    }
+  });
+
+  // Fee category routes
+  app.get('/api/fee-categories', isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getAllFeeCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching fee categories:", error);
+      res.status(500).json({ message: "Failed to fetch fee categories" });
+    }
+  });
+
+  app.post('/api/fee-categories', isAuthenticated, async (req, res) => {
+    try {
+      const data = insertFeeCategorySchema.parse(req.body);
+      const category = await storage.createFeeCategory(data);
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating fee category:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create fee category" });
+    }
+  });
+
+  app.patch('/api/fee-categories/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = insertFeeCategorySchema.partial().parse(req.body);
+      const category = await storage.updateFeeCategory(id, data);
+      if (!category) {
+        return res.status(404).json({ message: "Fee category not found" });
+      }
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating fee category:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update fee category" });
+    }
+  });
+
+  app.delete('/api/fee-categories/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteFeeCategory(id);
+      res.json({ message: "Fee category deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting fee category:", error);
+      res.status(500).json({ message: "Failed to delete fee category" });
+    }
+  });
+
+  // Fee structure routes
+  app.get('/api/fee-structures', isAuthenticated, async (req, res) => {
+    try {
+      const { classId, sessionId } = req.query;
+      let structures;
+      if (classId) {
+        structures = await storage.getFeeStructuresByClass(classId as string);
+      } else if (sessionId) {
+        structures = await storage.getFeeStructuresBySession(sessionId as string);
+      } else {
+        structures = await storage.getAllFeeStructures();
+      }
+      res.json(structures);
+    } catch (error) {
+      console.error("Error fetching fee structures:", error);
+      res.status(500).json({ message: "Failed to fetch fee structures" });
+    }
+  });
+
+  app.post('/api/fee-structures', isAuthenticated, async (req, res) => {
+    try {
+      const data = insertFeeStructureSchema.parse(req.body);
+      const structure = await storage.createFeeStructure(data);
+      res.json(structure);
+    } catch (error) {
+      console.error("Error creating fee structure:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create fee structure" });
+    }
+  });
+
+  app.patch('/api/fee-structures/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = insertFeeStructureSchema.partial().parse(req.body);
+      const structure = await storage.updateFeeStructure(id, data);
+      if (!structure) {
+        return res.status(404).json({ message: "Fee structure not found" });
+      }
+      res.json(structure);
+    } catch (error) {
+      console.error("Error updating fee structure:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update fee structure" });
+    }
+  });
+
+  app.delete('/api/fee-structures/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteFeeStructure(id);
+      res.json({ message: "Fee structure deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting fee structure:", error);
+      res.status(500).json({ message: "Failed to delete fee structure" });
+    }
+  });
+
+  app.post('/api/fee-structures/assign', isAuthenticated, async (req, res) => {
+    try {
+      const { classId, sessionId } = req.body;
+      await storage.assignFeesToStudents(classId, sessionId);
+      res.json({ message: "Fees assigned to students successfully" });
+    } catch (error) {
+      console.error("Error assigning fees:", error);
+      res.status(500).json({ message: "Failed to assign fees" });
+    }
+  });
+
+  // Student fee routes
+  app.get('/api/student-fees', isAuthenticated, async (req: any, res) => {
+    try {
+      const { studentId, pending } = req.query;
+      const currentUserId = req.user.claims.sub;
+      
+      let fees;
+      if (pending === 'true') {
+        fees = await storage.getPendingStudentFees(studentId || currentUserId);
+      } else if (studentId) {
+        fees = await storage.getStudentFeesByStudent(studentId as string);
+      } else {
+        fees = await storage.getAllStudentFees();
+      }
+      res.json(fees);
+    } catch (error) {
+      console.error("Error fetching student fees:", error);
+      res.status(500).json({ message: "Failed to fetch student fees" });
+    }
+  });
+
+  app.get('/api/student-fees/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const fee = await storage.getStudentFee(id);
+      if (!fee) {
+        return res.status(404).json({ message: "Student fee not found" });
+      }
+      res.json(fee);
+    } catch (error) {
+      console.error("Error fetching student fee:", error);
+      res.status(500).json({ message: "Failed to fetch student fee" });
+    }
+  });
+
+  app.post('/api/student-fees', isAuthenticated, async (req, res) => {
+    try {
+      const data = insertStudentFeeSchema.parse(req.body);
+      const fee = await storage.createStudentFee(data);
+      res.json(fee);
+    } catch (error) {
+      console.error("Error creating student fee:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create student fee" });
+    }
+  });
+
+  app.patch('/api/student-fees/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = insertStudentFeeSchema.partial().parse(req.body);
+      const fee = await storage.updateStudentFee(id, data);
+      if (!fee) {
+        return res.status(404).json({ message: "Student fee not found" });
+      }
+      res.json(fee);
+    } catch (error) {
+      console.error("Error updating student fee:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update student fee" });
+    }
+  });
+
+  app.delete('/api/student-fees/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteStudentFee(id);
+      res.json({ message: "Student fee deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting student fee:", error);
+      res.status(500).json({ message: "Failed to delete student fee" });
+    }
+  });
+
+  // Payment routes
+  app.get('/api/payments', isAuthenticated, async (req, res) => {
+    try {
+      const { studentId, studentFeeId } = req.query;
+      let payments;
+      if (studentId) {
+        payments = await storage.getPaymentsByStudent(studentId as string);
+      } else if (studentFeeId) {
+        payments = await storage.getPaymentsByStudentFee(studentFeeId as string);
+      } else {
+        payments = await storage.getAllPayments();
+      }
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  app.post('/api/payments', isAuthenticated, async (req: any, res) => {
+    try {
+      const receivedBy = req.user.claims.sub;
+      const data = insertPaymentSchema.parse({ ...req.body, receivedBy });
+      const payment = await storage.createPayment(data);
+      res.json(payment);
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create payment" });
+    }
+  });
+
+  app.patch('/api/payments/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = insertPaymentSchema.partial().parse(req.body);
+      const payment = await storage.updatePayment(id, data);
+      if (!payment) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
+      res.json(payment);
+    } catch (error) {
+      console.error("Error updating payment:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update payment" });
+    }
+  });
+
+  app.delete('/api/payments/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deletePayment(id);
+      res.json({ message: "Payment deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting payment:", error);
+      res.status(500).json({ message: "Failed to delete payment" });
+    }
+  });
+
+  // Expense category routes
+  app.get('/api/expense-categories', isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getAllExpenseCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching expense categories:", error);
+      res.status(500).json({ message: "Failed to fetch expense categories" });
+    }
+  });
+
+  app.post('/api/expense-categories', isAuthenticated, async (req, res) => {
+    try {
+      const data = insertExpenseCategorySchema.parse(req.body);
+      const category = await storage.createExpenseCategory(data);
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating expense category:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create expense category" });
+    }
+  });
+
+  app.patch('/api/expense-categories/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = insertExpenseCategorySchema.partial().parse(req.body);
+      const category = await storage.updateExpenseCategory(id, data);
+      if (!category) {
+        return res.status(404).json({ message: "Expense category not found" });
+      }
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating expense category:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update expense category" });
+    }
+  });
+
+  app.delete('/api/expense-categories/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteExpenseCategory(id);
+      res.json({ message: "Expense category deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting expense category:", error);
+      res.status(500).json({ message: "Failed to delete expense category" });
+    }
+  });
+
+  // Expense routes
+  app.get('/api/expenses', isAuthenticated, async (req, res) => {
+    try {
+      const { categoryId, startDate, endDate } = req.query;
+      let expenses;
+      if (categoryId) {
+        expenses = await storage.getExpensesByCategory(categoryId as string);
+      } else if (startDate && endDate) {
+        expenses = await storage.getExpensesByDateRange(
+          new Date(startDate as string),
+          new Date(endDate as string)
+        );
+      } else {
+        expenses = await storage.getAllExpenses();
+      }
+      res.json(expenses);
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
+      res.status(500).json({ message: "Failed to fetch expenses" });
+    }
+  });
+
+  app.post('/api/expenses', isAuthenticated, async (req: any, res) => {
+    try {
+      const createdBy = req.user.claims.sub;
+      const data = insertExpenseSchema.parse({ ...req.body, createdBy });
+      const expense = await storage.createExpense(data);
+      res.json(expense);
+    } catch (error) {
+      console.error("Error creating expense:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create expense" });
+    }
+  });
+
+  app.patch('/api/expenses/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = insertExpenseSchema.partial().parse(req.body);
+      const expense = await storage.updateExpense(id, data);
+      if (!expense) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      res.json(expense);
+    } catch (error) {
+      console.error("Error updating expense:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update expense" });
+    }
+  });
+
+  app.patch('/api/expenses/:id/approve', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const approvedBy = req.user.claims.sub;
+      const expense = await storage.approveExpense(id, approvedBy);
+      if (!expense) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      res.json(expense);
+    } catch (error) {
+      console.error("Error approving expense:", error);
+      res.status(500).json({ message: "Failed to approve expense" });
+    }
+  });
+
+  app.delete('/api/expenses/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteExpense(id);
+      res.json({ message: "Expense deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      res.status(500).json({ message: "Failed to delete expense" });
     }
   });
 

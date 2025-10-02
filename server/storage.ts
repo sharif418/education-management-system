@@ -8,6 +8,12 @@ import {
   enrollments,
   attendance,
   notifications,
+  feeCategories,
+  feeStructures,
+  studentFees,
+  payments,
+  expenseCategories,
+  expenses,
   type User,
   type UpsertUser,
   type Institution,
@@ -18,9 +24,15 @@ import {
   type Enrollment,
   type Attendance,
   type Notification,
+  type FeeCategory,
+  type FeeStructure,
+  type StudentFee,
+  type Payment,
+  type ExpenseCategory,
+  type Expense,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql as drizzleSql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -95,6 +107,58 @@ export interface IStorage {
   createNotification(data: typeof notifications.$inferInsert): Promise<Notification>;
   markNotificationAsRead(id: string): Promise<Notification | undefined>;
   deleteNotification(id: string): Promise<void>;
+
+  // Fee category operations
+  getAllFeeCategories(): Promise<FeeCategory[]>;
+  getFeeCategory(id: string): Promise<FeeCategory | undefined>;
+  createFeeCategory(data: typeof feeCategories.$inferInsert): Promise<FeeCategory>;
+  updateFeeCategory(id: string, data: Partial<typeof feeCategories.$inferInsert>): Promise<FeeCategory | undefined>;
+  deleteFeeCategory(id: string): Promise<void>;
+
+  // Fee structure operations
+  getAllFeeStructures(): Promise<FeeStructure[]>;
+  getFeeStructuresByClass(classId: string): Promise<FeeStructure[]>;
+  getFeeStructuresBySession(sessionId: string): Promise<FeeStructure[]>;
+  getFeeStructure(id: string): Promise<FeeStructure | undefined>;
+  createFeeStructure(data: typeof feeStructures.$inferInsert): Promise<FeeStructure>;
+  updateFeeStructure(id: string, data: Partial<typeof feeStructures.$inferInsert>): Promise<FeeStructure | undefined>;
+  deleteFeeStructure(id: string): Promise<void>;
+
+  // Student fee operations
+  getAllStudentFees(): Promise<StudentFee[]>;
+  getStudentFeesByStudent(studentId: string): Promise<StudentFee[]>;
+  getPendingStudentFees(studentId: string): Promise<StudentFee[]>;
+  getStudentFee(id: string): Promise<StudentFee | undefined>;
+  createStudentFee(data: typeof studentFees.$inferInsert): Promise<StudentFee>;
+  updateStudentFee(id: string, data: Partial<typeof studentFees.$inferInsert>): Promise<StudentFee | undefined>;
+  deleteStudentFee(id: string): Promise<void>;
+  assignFeesToStudents(classId: string, sessionId: string): Promise<void>;
+
+  // Payment operations
+  getAllPayments(): Promise<Payment[]>;
+  getPaymentsByStudent(studentId: string): Promise<Payment[]>;
+  getPaymentsByStudentFee(studentFeeId: string): Promise<Payment[]>;
+  getPayment(id: string): Promise<Payment | undefined>;
+  createPayment(data: typeof payments.$inferInsert): Promise<Payment>;
+  updatePayment(id: string, data: Partial<typeof payments.$inferInsert>): Promise<Payment | undefined>;
+  deletePayment(id: string): Promise<void>;
+
+  // Expense category operations
+  getAllExpenseCategories(): Promise<ExpenseCategory[]>;
+  getExpenseCategory(id: string): Promise<ExpenseCategory | undefined>;
+  createExpenseCategory(data: typeof expenseCategories.$inferInsert): Promise<ExpenseCategory>;
+  updateExpenseCategory(id: string, data: Partial<typeof expenseCategories.$inferInsert>): Promise<ExpenseCategory | undefined>;
+  deleteExpenseCategory(id: string): Promise<void>;
+
+  // Expense operations
+  getAllExpenses(): Promise<Expense[]>;
+  getExpensesByCategory(categoryId: string): Promise<Expense[]>;
+  getExpensesByDateRange(startDate: Date, endDate: Date): Promise<Expense[]>;
+  getExpense(id: string): Promise<Expense | undefined>;
+  createExpense(data: typeof expenses.$inferInsert): Promise<Expense>;
+  updateExpense(id: string, data: Partial<typeof expenses.$inferInsert>): Promise<Expense | undefined>;
+  deleteExpense(id: string): Promise<void>;
+  approveExpense(id: string, approvedBy: string): Promise<Expense | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -406,6 +470,317 @@ export class DatabaseStorage implements IStorage {
 
   async deleteNotification(id: string): Promise<void> {
     await db.delete(notifications).where(eq(notifications.id, id));
+  }
+
+  // Fee category operations
+  async getAllFeeCategories(): Promise<FeeCategory[]> {
+    return await db.select().from(feeCategories).orderBy(desc(feeCategories.createdAt));
+  }
+
+  async getFeeCategory(id: string): Promise<FeeCategory | undefined> {
+    const [category] = await db.select().from(feeCategories).where(eq(feeCategories.id, id));
+    return category;
+  }
+
+  async createFeeCategory(data: typeof feeCategories.$inferInsert): Promise<FeeCategory> {
+    const [category] = await db.insert(feeCategories).values(data).returning();
+    return category;
+  }
+
+  async updateFeeCategory(id: string, data: Partial<typeof feeCategories.$inferInsert>): Promise<FeeCategory | undefined> {
+    const [category] = await db
+      .update(feeCategories)
+      .set(data)
+      .where(eq(feeCategories.id, id))
+      .returning();
+    return category;
+  }
+
+  async deleteFeeCategory(id: string): Promise<void> {
+    await db.delete(feeCategories).where(eq(feeCategories.id, id));
+  }
+
+  // Fee structure operations
+  async getAllFeeStructures(): Promise<FeeStructure[]> {
+    return await db.select().from(feeStructures).orderBy(desc(feeStructures.createdAt));
+  }
+
+  async getFeeStructuresByClass(classId: string): Promise<FeeStructure[]> {
+    return await db.select().from(feeStructures).where(eq(feeStructures.classId, classId));
+  }
+
+  async getFeeStructuresBySession(sessionId: string): Promise<FeeStructure[]> {
+    return await db.select().from(feeStructures).where(eq(feeStructures.academicSessionId, sessionId));
+  }
+
+  async getFeeStructure(id: string): Promise<FeeStructure | undefined> {
+    const [structure] = await db.select().from(feeStructures).where(eq(feeStructures.id, id));
+    return structure;
+  }
+
+  async createFeeStructure(data: typeof feeStructures.$inferInsert): Promise<FeeStructure> {
+    const [structure] = await db.insert(feeStructures).values(data).returning();
+    return structure;
+  }
+
+  async updateFeeStructure(id: string, data: Partial<typeof feeStructures.$inferInsert>): Promise<FeeStructure | undefined> {
+    const [structure] = await db
+      .update(feeStructures)
+      .set(data)
+      .where(eq(feeStructures.id, id))
+      .returning();
+    return structure;
+  }
+
+  async deleteFeeStructure(id: string): Promise<void> {
+    await db.delete(feeStructures).where(eq(feeStructures.id, id));
+  }
+
+  // Student fee operations
+  async getAllStudentFees(): Promise<StudentFee[]> {
+    return await db.select().from(studentFees).orderBy(desc(studentFees.createdAt));
+  }
+
+  async getStudentFeesByStudent(studentId: string): Promise<StudentFee[]> {
+    return await db.select().from(studentFees).where(eq(studentFees.studentId, studentId));
+  }
+
+  async getPendingStudentFees(studentId: string): Promise<StudentFee[]> {
+    return await db
+      .select()
+      .from(studentFees)
+      .where(
+        and(
+          eq(studentFees.studentId, studentId),
+          drizzleSql`${studentFees.status} IN ('pending', 'partial')`
+        )
+      );
+  }
+
+  async getStudentFee(id: string): Promise<StudentFee | undefined> {
+    const [fee] = await db.select().from(studentFees).where(eq(studentFees.id, id));
+    return fee;
+  }
+
+  async createStudentFee(data: typeof studentFees.$inferInsert): Promise<StudentFee> {
+    const [fee] = await db.insert(studentFees).values(data).returning();
+    return fee;
+  }
+
+  async updateStudentFee(id: string, data: Partial<typeof studentFees.$inferInsert>): Promise<StudentFee | undefined> {
+    const [fee] = await db
+      .update(studentFees)
+      .set(data)
+      .where(eq(studentFees.id, id))
+      .returning();
+    return fee;
+  }
+
+  async deleteStudentFee(id: string): Promise<void> {
+    await db.delete(studentFees).where(eq(studentFees.id, id));
+  }
+
+  async assignFeesToStudents(classId: string, sessionId: string): Promise<void> {
+    const classEnrollments = await db
+      .select()
+      .from(enrollments)
+      .where(
+        and(
+          eq(enrollments.classId, classId),
+          eq(enrollments.academicSessionId, sessionId),
+          eq(enrollments.status, 'active')
+        )
+      );
+
+    const feeStructs = await db
+      .select()
+      .from(feeStructures)
+      .where(
+        and(
+          eq(feeStructures.classId, classId),
+          eq(feeStructures.academicSessionId, sessionId)
+        )
+      );
+
+    for (const enrollment of classEnrollments) {
+      for (const feeStruct of feeStructs) {
+        const [existing] = await db
+          .select()
+          .from(studentFees)
+          .where(
+            and(
+              eq(studentFees.studentId, enrollment.studentId!),
+              eq(studentFees.feeStructureId, feeStruct.id)
+            )
+          );
+
+        if (!existing) {
+          await db.insert(studentFees).values({
+            studentId: enrollment.studentId,
+            feeStructureId: feeStruct.id,
+            amount: feeStruct.amount,
+            finalAmount: feeStruct.amount,
+            dueDate: feeStruct.dueDate,
+            status: 'pending',
+          });
+        }
+      }
+    }
+  }
+
+  // Payment operations
+  async getAllPayments(): Promise<Payment[]> {
+    return await db.select().from(payments).orderBy(desc(payments.createdAt));
+  }
+
+  async getPaymentsByStudent(studentId: string): Promise<Payment[]> {
+    return await db.select().from(payments).where(eq(payments.studentId, studentId));
+  }
+
+  async getPaymentsByStudentFee(studentFeeId: string): Promise<Payment[]> {
+    return await db.select().from(payments).where(eq(payments.studentFeeId, studentFeeId));
+  }
+
+  async getPayment(id: string): Promise<Payment | undefined> {
+    const [payment] = await db.select().from(payments).where(eq(payments.id, id));
+    return payment;
+  }
+
+  async createPayment(data: typeof payments.$inferInsert): Promise<Payment> {
+    const [payment] = await db.insert(payments).values(data).returning();
+
+    if (data.studentFeeId) {
+      const [studentFee] = await db
+        .select()
+        .from(studentFees)
+        .where(eq(studentFees.id, data.studentFeeId));
+
+      if (studentFee) {
+        const allPaymentsForFee = await db
+          .select()
+          .from(payments)
+          .where(eq(payments.studentFeeId, data.studentFeeId));
+
+        const totalPaid = allPaymentsForFee.reduce((sum, p) => sum + parseFloat(p.amount || '0'), 0);
+
+        const finalAmount = parseFloat(studentFee.finalAmount || '0');
+        let status = 'pending';
+        if (totalPaid >= finalAmount) {
+          status = 'paid';
+        } else if (totalPaid > 0) {
+          status = 'partial';
+        }
+
+        await db
+          .update(studentFees)
+          .set({
+            paidAmount: totalPaid.toString(),
+            status,
+          })
+          .where(eq(studentFees.id, data.studentFeeId));
+      }
+    }
+
+    return payment;
+  }
+
+  async updatePayment(id: string, data: Partial<typeof payments.$inferInsert>): Promise<Payment | undefined> {
+    const [payment] = await db
+      .update(payments)
+      .set(data)
+      .where(eq(payments.id, id))
+      .returning();
+    return payment;
+  }
+
+  async deletePayment(id: string): Promise<void> {
+    await db.delete(payments).where(eq(payments.id, id));
+  }
+
+  // Expense category operations
+  async getAllExpenseCategories(): Promise<ExpenseCategory[]> {
+    return await db.select().from(expenseCategories).orderBy(desc(expenseCategories.createdAt));
+  }
+
+  async getExpenseCategory(id: string): Promise<ExpenseCategory | undefined> {
+    const [category] = await db.select().from(expenseCategories).where(eq(expenseCategories.id, id));
+    return category;
+  }
+
+  async createExpenseCategory(data: typeof expenseCategories.$inferInsert): Promise<ExpenseCategory> {
+    const [category] = await db.insert(expenseCategories).values(data).returning();
+    return category;
+  }
+
+  async updateExpenseCategory(id: string, data: Partial<typeof expenseCategories.$inferInsert>): Promise<ExpenseCategory | undefined> {
+    const [category] = await db
+      .update(expenseCategories)
+      .set(data)
+      .where(eq(expenseCategories.id, id))
+      .returning();
+    return category;
+  }
+
+  async deleteExpenseCategory(id: string): Promise<void> {
+    await db.delete(expenseCategories).where(eq(expenseCategories.id, id));
+  }
+
+  // Expense operations
+  async getAllExpenses(): Promise<Expense[]> {
+    return await db.select().from(expenses).orderBy(desc(expenses.createdAt));
+  }
+
+  async getExpensesByCategory(categoryId: string): Promise<Expense[]> {
+    return await db.select().from(expenses).where(eq(expenses.categoryId, categoryId));
+  }
+
+  async getExpensesByDateRange(startDate: Date, endDate: Date): Promise<Expense[]> {
+    const startStr = startDate.toISOString().split('T')[0];
+    const endStr = endDate.toISOString().split('T')[0];
+    return await db
+      .select()
+      .from(expenses)
+      .where(
+        and(
+          drizzleSql`${expenses.expenseDate} >= ${startStr}`,
+          drizzleSql`${expenses.expenseDate} <= ${endStr}`
+        )
+      );
+  }
+
+  async getExpense(id: string): Promise<Expense | undefined> {
+    const [expense] = await db.select().from(expenses).where(eq(expenses.id, id));
+    return expense;
+  }
+
+  async createExpense(data: typeof expenses.$inferInsert): Promise<Expense> {
+    const [expense] = await db.insert(expenses).values(data).returning();
+    return expense;
+  }
+
+  async updateExpense(id: string, data: Partial<typeof expenses.$inferInsert>): Promise<Expense | undefined> {
+    const [expense] = await db
+      .update(expenses)
+      .set(data)
+      .where(eq(expenses.id, id))
+      .returning();
+    return expense;
+  }
+
+  async deleteExpense(id: string): Promise<void> {
+    await db.delete(expenses).where(eq(expenses.id, id));
+  }
+
+  async approveExpense(id: string, approvedBy: string): Promise<Expense | undefined> {
+    const [expense] = await db
+      .update(expenses)
+      .set({
+        status: 'approved',
+        approvedBy,
+      })
+      .where(eq(expenses.id, id))
+      .returning();
+    return expense;
   }
 }
 

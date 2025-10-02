@@ -9,6 +9,7 @@ import {
   boolean,
   integer,
   date,
+  decimal,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -118,6 +119,80 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Fee categories (tuition, admission, exam, etc.)
+export const feeCategories = pgTable("fee_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Fee structures - Base fee amounts per class and category
+export const feeStructures = pgTable("fee_structures", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  classId: varchar("class_id").references(() => classes.id),
+  academicSessionId: varchar("academic_session_id").references(() => academicSessions.id),
+  feeCategoryId: varchar("fee_category_id").references(() => feeCategories.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  dueDate: date("due_date"),
+  isRecurring: boolean("is_recurring").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Student fee assignments with waivers/discounts
+export const studentFees = pgTable("student_fees", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").references(() => users.id),
+  feeStructureId: varchar("fee_structure_id").references(() => feeStructures.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).default("0"),
+  waiverReason: text("waiver_reason"),
+  finalAmount: decimal("final_amount", { precision: 10, scale: 2 }).notNull(),
+  paidAmount: decimal("paid_amount", { precision: 10, scale: 2 }).default("0"),
+  status: varchar("status").default("pending"), // pending, partial, paid, waived
+  dueDate: date("due_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Payments - Fee payment records
+export const payments = pgTable("payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentFeeId: varchar("student_fee_id").references(() => studentFees.id),
+  studentId: varchar("student_id").references(() => users.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: varchar("payment_method").notNull(), // cash, bank_transfer, card, mobile_banking
+  transactionId: varchar("transaction_id"),
+  paymentDate: date("payment_date").notNull(),
+  notes: text("notes"),
+  receivedBy: varchar("received_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Expense categories
+export const expenseCategories = pgTable("expense_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Expenses - Institutional expense records
+export const expenses = pgTable("expenses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id").references(() => expenseCategories.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  expenseDate: date("expense_date").notNull(),
+  paymentMethod: varchar("payment_method"), // cash, bank_transfer, card
+  referenceNumber: varchar("reference_number"),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  status: varchar("status").default("pending"), // pending, approved, rejected
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Type exports
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -129,6 +204,12 @@ export type Subject = typeof subjects.$inferSelect;
 export type Enrollment = typeof enrollments.$inferSelect;
 export type Attendance = typeof attendance.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type FeeCategory = typeof feeCategories.$inferSelect;
+export type FeeStructure = typeof feeStructures.$inferSelect;
+export type StudentFee = typeof studentFees.$inferSelect;
+export type Payment = typeof payments.$inferSelect;
+export type ExpenseCategory = typeof expenseCategories.$inferSelect;
+export type Expense = typeof expenses.$inferSelect;
 
 // Insert schemas for validation
 export const insertInstitutionSchema = createInsertSchema(institutions).omit({ id: true, createdAt: true, updatedAt: true });
@@ -139,3 +220,9 @@ export const insertSubjectSchema = createInsertSchema(subjects).omit({ id: true,
 export const insertEnrollmentSchema = createInsertSchema(enrollments).omit({ id: true, createdAt: true });
 export const insertAttendanceSchema = createInsertSchema(attendance).omit({ id: true, createdAt: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
+export const insertFeeCategorySchema = createInsertSchema(feeCategories).omit({ id: true, createdAt: true });
+export const insertFeeStructureSchema = createInsertSchema(feeStructures).omit({ id: true, createdAt: true });
+export const insertStudentFeeSchema = createInsertSchema(studentFees).omit({ id: true, createdAt: true });
+export const insertPaymentSchema = createInsertSchema(payments).omit({ id: true, createdAt: true });
+export const insertExpenseCategorySchema = createInsertSchema(expenseCategories).omit({ id: true, createdAt: true });
+export const insertExpenseSchema = createInsertSchema(expenses).omit({ id: true, createdAt: true });

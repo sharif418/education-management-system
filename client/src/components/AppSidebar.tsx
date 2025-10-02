@@ -21,6 +21,9 @@ import {
   BookOpen,
   Home,
   LogOut,
+  DollarSign,
+  Receipt,
+  TrendingDown,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -43,11 +46,10 @@ const menuItems = {
     { title: "Sections", icon: Users, url: "/sections" },
     { title: "Enrollments", icon: GraduationCap, url: "/enrollments" },
     { title: "Users", icon: Users, url: "/users" },
-    { title: "Students", icon: GraduationCap, url: "/students" },
-    { title: "Teachers", icon: Users, url: "/teachers" },
     { title: "Attendance", icon: Calendar, url: "/attendance" },
-    { title: "Exams", icon: FileText, url: "/exams" },
-    { title: "Finance", icon: CreditCard, url: "/finance" },
+    { title: "Fee Management", icon: DollarSign, url: "/fee-management" },
+    { title: "Fee Collection", icon: Receipt, url: "/fee-collection" },
+    { title: "Expenses", icon: TrendingDown, url: "/expenses" },
     { title: "Settings", icon: Settings, url: "/settings" },
   ],
   teacher: [

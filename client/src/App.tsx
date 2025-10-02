@@ -15,6 +15,9 @@ import Subjects from "@/pages/Subjects";
 import Sections from "@/pages/Sections";
 import Enrollments from "@/pages/Enrollments";
 import Attendance from "@/pages/Attendance";
+import FeeManagement from "@/pages/FeeManagement";
+import FeeCollection from "@/pages/FeeCollection";
+import Expenses from "@/pages/Expenses";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -34,6 +37,9 @@ function Router() {
           <Route path="/enrollments" component={Enrollments} />
           <Route path="/attendance" component={Attendance} />
           <Route path="/users" component={Users} />
+          <Route path="/fee-management" component={FeeManagement} />
+          <Route path="/fee-collection" component={FeeCollection} />
+          <Route path="/expenses" component={Expenses} />
         </>
       )}
       <Route component={NotFound} />
