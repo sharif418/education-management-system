@@ -118,3 +118,33 @@ Preferred communication style: Simple, everyday language.
 **Session Storage**
 - `connect-pg-simple` - PostgreSQL session store for express-session
 - Automatic session table management in database
+
+## Replit Environment Setup
+
+### Initial Setup Completed (October 2, 2025)
+The project has been successfully configured to run in the Replit environment with the following setup:
+
+**Database Configuration**
+- PostgreSQL database provisioned using Replit's built-in database service
+- Environment variables automatically configured: `DATABASE_URL`, `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`
+- Database schema pushed successfully using `npm run db:push`
+
+**Development Workflow**
+- Workflow: "Start application" configured to run `npm run dev` on port 5000
+- Frontend and backend both served on port 5000 (single server setup)
+- Vite development server configured with `allowedHosts: true` for Replit proxy compatibility
+- Host binding: `0.0.0.0:5000` to allow external connections through Replit's proxy
+
+**Deployment Configuration**
+- Build command: `npm run build` (Vite build + esbuild for server bundling)
+- Start command: `npm run start` (runs `node dist/index.js`)
+- Deployment target: Autoscale (stateless web application)
+
+### Running the Application
+- The application runs automatically via the "Start application" workflow
+- Access via the Replit webview on port 5000
+- Hot Module Replacement (HMR) enabled for rapid development
+
+### Authentication
+- Replit Auth integration available but requires manual configuration
+- Login will work once Replit Auth OAuth is properly configured for the Repl
