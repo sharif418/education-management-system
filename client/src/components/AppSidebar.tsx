@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
@@ -24,6 +25,11 @@ import {
   DollarSign,
   Receipt,
   TrendingDown,
+  UserCog,
+  School,
+  ClipboardList,
+  Wallet,
+  ChartBar,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -37,42 +43,97 @@ interface AppSidebarProps {
   };
 }
 
-const menuItems = {
+const menuGroups = {
   admin: [
-    { title: "Dashboard", icon: LayoutDashboard, url: "/" },
-    { title: "Academic Sessions", icon: Calendar, url: "/academic-sessions" },
-    { title: "Classes", icon: BookOpen, url: "/classes" },
-    { title: "Subjects", icon: BookOpen, url: "/subjects" },
-    { title: "Sections", icon: Users, url: "/sections" },
-    { title: "Enrollments", icon: GraduationCap, url: "/enrollments" },
-    { title: "Users", icon: Users, url: "/users" },
-    { title: "Attendance", icon: Calendar, url: "/attendance" },
-    { title: "Fee Management", icon: DollarSign, url: "/fee-management" },
-    { title: "Fee Collection", icon: Receipt, url: "/fee-collection" },
-    { title: "Expenses", icon: TrendingDown, url: "/expenses" },
-    { title: "Settings", icon: Settings, url: "/settings" },
+    {
+      label: "Overview",
+      items: [
+        { title: "Dashboard", icon: LayoutDashboard, url: "/" },
+      ]
+    },
+    {
+      label: "Academic Management",
+      items: [
+        { title: "Academic Sessions", icon: Calendar, url: "/academic-sessions" },
+        { title: "Class Management", icon: School, url: "/classes" },
+        { title: "Subjects", icon: BookOpen, url: "/subjects" },
+        { title: "Sections", icon: Users, url: "/sections" },
+        { title: "Enrollments", icon: GraduationCap, url: "/enrollments" },
+      ]
+    },
+    {
+      label: "People",
+      items: [
+        { title: "Users", icon: UserCog, url: "/users" },
+        { title: "Attendance", icon: ClipboardList, url: "/attendance" },
+      ]
+    },
+    {
+      label: "Finance & Accounts",
+      items: [
+        { title: "Fee Management", icon: DollarSign, url: "/fee-management" },
+        { title: "Fee Collection", icon: Receipt, url: "/fee-collection" },
+        { title: "Expenses", icon: TrendingDown, url: "/expenses" },
+      ]
+    },
+    {
+      label: "System",
+      items: [
+        { title: "Settings", icon: Settings, url: "/settings" },
+      ]
+    }
   ],
   teacher: [
-    { title: "Dashboard", icon: Home, url: "/" },
-    { title: "My Classes", icon: BookOpen, url: "/classes" },
-    { title: "Attendance", icon: Calendar, url: "/attendance" },
-    { title: "Assignments", icon: FileText, url: "/assignments" },
-    { title: "Exams", icon: FileText, url: "/exams" },
+    {
+      label: "Overview",
+      items: [
+        { title: "Dashboard", icon: Home, url: "/" },
+      ]
+    },
+    {
+      label: "Teaching",
+      items: [
+        { title: "My Classes", icon: BookOpen, url: "/classes" },
+        { title: "Attendance", icon: Calendar, url: "/attendance" },
+        { title: "Assignments", icon: FileText, url: "/assignments" },
+        { title: "Exams", icon: FileText, url: "/exams" },
+      ]
+    }
   ],
   student: [
-    { title: "Dashboard", icon: Home, url: "/" },
-    { title: "My Classes", icon: BookOpen, url: "/classes" },
-    { title: "Attendance", icon: Calendar, url: "/attendance" },
-    { title: "Assignments", icon: FileText, url: "/assignments" },
-    { title: "Exams", icon: FileText, url: "/exams" },
-    { title: "Results", icon: GraduationCap, url: "/results" },
+    {
+      label: "Overview",
+      items: [
+        { title: "Dashboard", icon: Home, url: "/" },
+      ]
+    },
+    {
+      label: "Learning",
+      items: [
+        { title: "My Classes", icon: BookOpen, url: "/classes" },
+        { title: "Attendance", icon: Calendar, url: "/attendance" },
+        { title: "Assignments", icon: FileText, url: "/assignments" },
+        { title: "Exams", icon: FileText, url: "/exams" },
+        { title: "Results", icon: GraduationCap, url: "/results" },
+      ]
+    }
   ],
   guardian: [
-    { title: "Dashboard", icon: Home, url: "/" },
-    { title: "Children", icon: Users, url: "/children" },
-    { title: "Attendance", icon: Calendar, url: "/attendance" },
-    { title: "Results", icon: GraduationCap, url: "/results" },
-    { title: "Fees", icon: CreditCard, url: "/fees" },
+    {
+      label: "Overview",
+      items: [
+        { title: "Dashboard", icon: Home, url: "/" },
+        { title: "Children", icon: Users, url: "/children" },
+      ]
+    },
+    {
+      label: "Monitoring",
+      items: [
+        { title: "Attendance", icon: Calendar, url: "/attendance" },
+        { title: "Results", icon: GraduationCap, url: "/results" },
+        { title: "Fees", icon: CreditCard, url: "/fees" },
+      ]
+    }
   ],
 };
 
@@ -84,45 +145,51 @@ const roleLabels = {
 };
 
 export default function AppSidebar({ role, user }: AppSidebarProps) {
-  const items = menuItems[role];
+  const groups = menuGroups[role];
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
             <GraduationCap className="w-6 h-6 text-primary-foreground" />
           </div>
-          <div>
-            <h2 className="font-display font-semibold">EduPro</h2>
-            <p className="text-xs text-muted-foreground">Education System</p>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-display font-semibold truncate">EduPro</h2>
+            <p className="text-xs text-muted-foreground truncate">Education System</p>
           </div>
         </div>
       </SidebarHeader>
       
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild data-testid={`sidebar-${item.title.toLowerCase()}`}>
-                    <a href={item.url}>
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      tooltip={item.title}
+                      data-testid={`sidebar-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
         <div className="flex items-center gap-3 mb-3">
-          <Avatar className="w-10 h-10">
+          <Avatar className="w-10 h-10 shrink-0">
             <AvatarImage src={user.avatar} />
             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
@@ -139,9 +206,10 @@ export default function AppSidebar({ role, user }: AppSidebarProps) {
           data-testid="button-logout"
         >
           <LogOut className="w-4 h-4" />
-          Logout
+          <span>Logout</span>
         </a>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
