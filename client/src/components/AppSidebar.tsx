@@ -52,7 +52,7 @@ const menuGroups = {
       ]
     },
     {
-      label: "Academic Management",
+      label: "Academic",
       items: [
         { title: "Academic Sessions", icon: Calendar, url: "/academic-sessions" },
         { title: "Class Management", icon: School, url: "/classes" },
@@ -62,14 +62,14 @@ const menuGroups = {
       ]
     },
     {
-      label: "People",
+      label: "Management",
       items: [
         { title: "Users", icon: UserCog, url: "/users" },
         { title: "Attendance", icon: ClipboardList, url: "/attendance" },
       ]
     },
     {
-      label: "Finance & Accounts",
+      label: "Finance",
       items: [
         { title: "Fee Management", icon: DollarSign, url: "/fee-management" },
         { title: "Fee Collection", icon: Receipt, url: "/fee-collection" },
