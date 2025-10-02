@@ -1,0 +1,40 @@
+Excellent work setting up the project! The application is stable and running perfectly. This strong foundation is exactly what we need.
+
+We are now ready to begin building "EduPro - The Masterpiece Edition". I am providing you with a complete and detailed vision document. Your mission is to use this vision to enhance the existing application and build out all remaining features to a world-class standard.
+
+**Our Master Blueprint:**
+I am pasting the complete project vision below. Please read it carefully. This is our "Single Source of Truth".
+
+---
+[এখানে আপনি Ninja AI-এর সাথে হওয়া কথোপকথনের `ERP All Convertion.txt` ফাইলের সম্পূর্ণ টেক্সটটি পেস্ট করে দিন, "মাস্টারপিস" মাদ্রাসা ম্যানেজমেন্ট ইকোসিস্টেম... থেকে শুরু করে শেষ পর্যন্ত।]
+---
+
+**Your Mission & Workflow:**
+
+You have already built a significant portion of the "Core Academic" modules. Now, your task is to continue building the application by following the master blueprint, phase by phase.
+
+**Your Immediate Next Task: Implement "Phase চ: আর্থিক ও হিসাবরক্ষণ (Finance & Accounts)"**
+
+Based on the master blueprint, please build the complete financial module.
+
+**Key Features to Implement:**
+1.  **ফি ও ডিউস ম্যানেজমেন্ট (Fee & Dues Management):**
+    *   Create the UI for setting up various fee heads.
+    *   Build the interface for generating invoices for students.
+2.  **বাল্ক ফি কালেকশন (Bulk Fee Collection):**
+    *   Build a powerful interface for collecting fees, allowing for partial payments, waivers, and on-screen receipt generation.
+3.  **আয়-ব্যয় ব্যবস্থাপনা (Income-Expense Management):**
+    *   Build the interface for recording institutional income and expenses.
+4.  **Backend & Database:**
+    *   Create all necessary backend APIs and database schemas to support these features.
+    *   Run the database migration/push after updating the schema.
+
+**"Masterpiece" UI/UX Enhancements to Implement NOW:**
+
+As you build, please also incorporate these small but crucial UI/UX improvements inspired by our vision:
+
+1.  **Collapsible Sidebar:** Modify the existing sidebar. Add a "Collapse" button at the bottom. When clicked, the sidebar should shrink to show only the icons, just like the design in the attached screenshot.
+2.  **Improved Icons:** Review the sidebar navigation icons and replace them with more appropriate and visually appealing icons from the `lucide-react` library to match the "masterpiece" quality.
+
+**Final Instruction:**
+Your goal is to be both an engineer and a designer. Follow the master blueprint, build the complete Financial module, and implement the UI/UX enhancements. Let's start building "EduPro - The Masterpiece Edition".
